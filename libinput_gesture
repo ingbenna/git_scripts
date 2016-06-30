@@ -16,9 +16,9 @@ SWIPE=0
 NFINGERS=0
 
 libinput-debug-events | while read -r LINE; do
-	if grep -q 'GESTURE_PINCH_BEGIN'<<< "$LINE"; then	
+	if grep -q 'GESTURE_PINCH_END'<<< "$LINE"; then	
 		PINCH=1; continue
-	elif grep -q 'GESTURE_SWIPE_BEGIN' <<< "$LINE"; then
+	elif grep -q 'GESTURE_SWIPE_END' <<< "$LINE"; then
 		SWIPE=1; continue
 	fi
 
