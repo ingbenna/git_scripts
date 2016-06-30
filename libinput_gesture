@@ -17,14 +17,16 @@ NFINGERS=0
 
 libinput-debug-events | while read -r LINE; do
 	if grep -q 'GESTURE_PINCH_END'<<< "$LINE"; then	
+		PREV_LINE="$LINE"
 		PINCH=1; continue
 	elif grep -q 'GESTURE_SWIPE_END' <<< "$LINE"; then
+		PREV_LINE="$LINE"
 		SWIPE=1; continue
 	fi
 
 	if [[ "$PINCH" == 1 ]]; then
-		NFINGERS="$(awk '{print $4}' <<< "$LINE")"
-		DIR="$(sed -s 's/\ @.*//g;s/.*ted)\ \ //g;s/\..*//g'<<< "$LINE")"
+		NFINGERS="$(awk '{print $4}' <<< "$PREV_LINE")"
+		DIR="$(sed -s 's/\ @.*//g;s/.*ted)\ \ //g;s/\..*//g'<<< "$PREV_LINE")"
 		if [[ "$DIR" -ge 1 ]]; then
 			eval "$PINCH_OUT" &
 			eval "$PRINT_NFINGERS" &
@@ -34,7 +36,7 @@ libinput-debug-events | while read -r LINE; do
 		fi	
 		PINCH=0
 	elif [[ "$SWIPE" == 1 ]]; then
-		DIR="$(sed -s 's/(.*//g;s/.*\///g;s/\..*//g'<<< "$LINE")"
+		DIR="$(sed -s 's/(.*//g;s/.*\///g;s/\..*//g'<<< "$PREV_LINE")"
 		if [[ "$DIR" -gt 0 ]]; then
 			eval "$SWIPE_DOWN" &
 			eval "$PRINT_NFINGERS" &
