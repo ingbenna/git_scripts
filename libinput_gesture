@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Remember to add your user to 'input' group: 
+#		# gpasswd -a user input
+#
+
+# Command
+SWIPE_UP='echo "swipe up"' 
+SWIPE_DOWN='echo "swipe down"'
+PINCH_IN='echo "pinch in"'
+PINCH_OUT='echo "pinch out"'
+PRINT_NFINGERS='echo "Number of fingers: $NFINGERS"'
+
+PINCH=0
+SWIPE=0
+NFINGERS=0
+
+libinput-debug-events | while read -r LINE; do
+	if grep -q 'GESTURE_PINCH_BEGIN'<<< "$LINE"; then	
+		PINCH=1; continue
+	elif grep -q 'GESTURE_SWIPE_BEGIN' <<< "$LINE"; then
+		SWIPE=1; continue
+	fi
+
+	if [[ "$PINCH" == 1 ]]; then
+		NFINGERS="$(awk '{print $4}' <<< "$LINE")"
+		DIR="$(sed -s 's/\ @.*//g;s/.*ted)\ \ //g;s/\..*//g'<<< "$LINE")"
+		if [[ "$DIR" -ge 1 ]]; then
+			eval "$PINCH_OUT" &
+			eval "$PRINT_NFINGERS" &
+		else
+			eval "$PINCH_IN" &
+			eval "$PRINT_NFINGERS" &
+		fi	
+		PINCH=0
+	elif [[ "$SWIPE" == 1 ]]; then
+		DIR="$(sed -s 's/(.*//g;s/.*\///g;s/\..*//g'<<< "$LINE")"
+		if [[ "$DIR" -gt 0 ]]; then
+			eval "$SWIPE_DOWN" &
+			eval "$PRINT_NFINGERS" &
+		else
+			eval "$SWIPE_UP" &
+			eval "$PRINT_NFINGERS" &
+		fi	
+		SWIPE=0
+	fi
+
+done
