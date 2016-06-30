@@ -44,5 +44,4 @@ libinput-debug-events | while read -r LINE; do
 		fi	
 		SWIPE=0
 	fi
-
 done
